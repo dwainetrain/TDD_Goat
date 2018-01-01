@@ -30,7 +30,7 @@ class NewVisitorTest(unittest.TestCase):
 
         # and enters in his first to do item
         # "Everything"
-        input.send_keys('Do Everything')
+        inputbox.send_keys('Do Everything')
 
         # He presses enter and it appears in a list below
         inputbox.send_keys(Keys.ENTER)
@@ -39,7 +39,8 @@ class NewVisitorTest(unittest.TestCase):
         table = self.browser.find_element_by_id('id_list_table')
         rows = table.find_elements_by_tag_name('tr')
         self.assertTrue(
-            any(row.text == '1: Do Everything' for row in rows)
+            any(row.text == '1: Do Everything' for row in rows),
+            "New to-do item did not appear in table"
         )
 
         # The text entry remains, and he sees he can add more items to the todo List
@@ -54,7 +55,7 @@ class NewVisitorTest(unittest.TestCase):
         # All is good, and he's got a lot of work to do tomorrow
 
         self.fail('Finish the test!')
-        
+
 if __name__ == '__main__':
     unittest.main(warnings='ignore')
 

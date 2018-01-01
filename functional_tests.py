@@ -40,7 +40,7 @@ class NewVisitorTest(unittest.TestCase):
         rows = table.find_elements_by_tag_name('tr')
         self.assertTrue(
             any(row.text == '1: Do Everything' for row in rows),
-            "New to-do item did not appear in table"
+            f"New to-do item did not appear in table. Contents were:\n{table.text}"
         )
 
         # The text entry remains, and he sees he can add more items to the todo List

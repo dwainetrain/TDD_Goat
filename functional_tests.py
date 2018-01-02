@@ -38,13 +38,16 @@ class NewVisitorTest(unittest.TestCase):
 
         table = self.browser.find_element_by_id('id_list_table')
         rows = table.find_elements_by_tag_name('tr')
-        self.assertTrue(
-            any(row.text == '1: Do Everything' for row in rows),
-            f"New to-do item did not appear in table. Contents were:\n{table.text}"
-        )
+        self.assertIn('1: Do Everything', [row.text for row in rows])
 
         # The text entry remains, and he sees he can add more items to the todo List
         # He adds his next item "And then Some"
+        self.assertIn(
+            '2: And then some',
+            [row.text for row in rows]
+        )
+
+
 
         # But when he wakes up tomorrow, will the list still be there?
 

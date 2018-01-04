@@ -1,9 +1,11 @@
 from django.test import LiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
+from selenium.common.exceptions import WebDriverException
 import time
 #import unittest
 
+MAX_WAIT = 10
 
 class NewVisitorTest(LiveServerTestCase):
 
@@ -15,10 +17,20 @@ class NewVisitorTest(LiveServerTestCase):
 
     # helper method, refactoring to remove repeated code accessing
     # the rows
-    def check_for_row_in_list_table(self, row_text):
-        table = self.browser.find_element_by_id('id_list_table')
-        rows = table.find_elements_by_tag_name('tr')
-        self.assertIn(row_text, [row.text for row in rows])
+
+    def wait_for_row_in_list_table(self, row_text):
+        start_time = time.time()
+        while True:
+            try:
+                table = self.browser.find_element_by_id('id_list_table')
+                rows = table.find_elements_by_tag_name('tr')
+                self.assertIn(row_text, [row.text for row in rows])
+                return
+            except (AssertionError, WebDriverException) as e:
+                if time.time() - start_time > MAX_WAIT:
+                    raise # -*- coding: utf-8 -*-
+                time.sleep(0.5)
+
 
     def test_can_start_a_list_and_retrieve_it_later(self):
         # Jacob visits the site
@@ -43,8 +55,7 @@ class NewVisitorTest(LiveServerTestCase):
 
         # He presses enter and it appears in a list below
         inputbox.send_keys(Keys.ENTER)
-        time.sleep(1)
-        self.check_for_row_in_list_table('1: Do Everything')
+        self.wait_for_row_in_list_table('1: Do Everything')
 
         table = self.browser.find_element_by_id('id_list_table')
         rows = table.find_elements_by_tag_name('tr')
@@ -55,15 +66,12 @@ class NewVisitorTest(LiveServerTestCase):
         inputbox = self.browser.find_element_by_id('id_new_item')
         inputbox.send_keys('And then some')
         inputbox.send_keys(Keys.ENTER)
-        time.sleep(1)
-        #self.assertIn(
-        #    '2: And then some',
-        #    [row.text for row in rows]
-        #)
 
         # The page updates again, and now shows both items on his lists
-        self.check_for_row_in_list_table('1: Do Everything')
-        self.check_for_row_in_list_table('2: And then some')
+        self.wait_for_row_in_list_table('1: Do Everything')
+        self.wait_for_row_in_list_table('2: And then some')
+
+        
 
         # But when he wakes up tomorrow, will the list still be there?
 
@@ -74,6 +82,3 @@ class NewVisitorTest(LiveServerTestCase):
         # All is good, and he's got a lot of work to do tomorrow
 
         self.fail('Finish the test!')
-
-
-#browser.quit()

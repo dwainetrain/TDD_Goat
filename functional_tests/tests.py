@@ -32,7 +32,7 @@ class NewVisitorTest(LiveServerTestCase):
                 time.sleep(0.5)
 
 
-    def test_can_start_a_list_and_retrieve_it_later(self):
+    def test_can_start_a_list_for_one_user(self):
         # Jacob visits the site
         self.browser.get(self.live_server_url)
 
@@ -72,13 +72,54 @@ class NewVisitorTest(LiveServerTestCase):
         self.wait_for_row_in_list_table('2: And then some')
 
 
+    def test_multiple_users_can_start_lists_at_different_urls(self):
+        # Jacob starts a new to-do lists
+        self.browser.get(self.live_server_url)
+        inputbox = self.browser.find_element_by_id('id_new_item')
+        inputbox.send_keys('Do Everything')
+        inputbox.send_keys(Keys.ENTER)
+        self.wait_for_row_in_list_table('1: Do Everything')
+
 
         # But when he wakes up tomorrow, will the list still be there?
-
         # He notices that there's a unique url and that
+        jacob_list_url = self.browser.current_url
+        self.assertRegex(jacob_list_url, '/lists/.+')
+
+        # Now a new user, Francis, comes along to the site
+
+        ## We use a new browser session to make sure that no information
+        ## of Jacob's is coming through from cookies, etc.
+        self.browser.quit()
+        self.browser = webdriver.Firefox()
+
+        # Francis visits the home page. There is no sign of Jacob's
+        # list
+        self.browser.get(self.live_server_url)
+        page_text = self.browser.find_element_by_tag_name('body').text
+        self.assertNotIn('Do Everything', page_text)
+        self.assertNotIn('And then some', page_text)
+
+        # Francis starts a new list by entering a new item. He
+        # is less interesting that Edith...
+        inputbox = self.browser.find_element_by_id('id_new_item')
+        inputbox.send_keys('But milk')
+        inputbox.send_keys(Keys.ENTER)
+        self.wait_for_row_in_list_table('1: Buy milk')
+
+        # Francis gets his own unique URL
+        francis_list_url = self.browser.current_url
+        self.assertRegex(francis_list_url, '/lists/.+')
+        self.assertNotEqual(francis_list_url, jacob_list_url)
+
+        # Again, there is no trace of Jacob's list
+        page_text = self.browser.find_element_by_tag_name('body').text
+        self.assertNotIn('Do Everything', page_text)
+        self.assertIn('And then some', page_text)
+
         # there's helper text which explains that his list will persist
 
-        # He refreshes the browser to test
-        # All is good, and he's got a lot of work to do tomorrow
+        # They both refresh the browser to test
+        # All is good, and they've got a lot of work to do tomorrow
 
         self.fail('Finish the test!')

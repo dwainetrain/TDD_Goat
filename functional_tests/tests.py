@@ -28,7 +28,7 @@ class NewVisitorTest(LiveServerTestCase):
                 return
             except (AssertionError, WebDriverException) as e:
                 if time.time() - start_time > MAX_WAIT:
-                    raise # -*- coding: utf-8 -*-
+                    raise e
                 time.sleep(0.5)
 
 
@@ -71,7 +71,7 @@ class NewVisitorTest(LiveServerTestCase):
         self.wait_for_row_in_list_table('1: Do Everything')
         self.wait_for_row_in_list_table('2: And then some')
 
-        
+
 
         # But when he wakes up tomorrow, will the list still be there?
 

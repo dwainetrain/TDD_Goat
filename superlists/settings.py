@@ -25,7 +25,7 @@ SECRET_KEY = 'asw4ay-l88%s+^qz*_f^bwbcsb%d8nnn*7b1w*+yc&y&v$b%ja'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['superlists-staging.dwainebest.com']
 
 
 # Application definition

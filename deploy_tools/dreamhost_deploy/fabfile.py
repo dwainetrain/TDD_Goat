@@ -20,7 +20,7 @@ REPO_URL = "https://github.com/dwainetrain/TDD_Goat.git"
 # I'll need to setup fabric with the dreamhost instructions it appears...
 
 def _create_directory_structure_if_necassary(site_folder):
-    for subfolder in ('database', 'static', 'virtualenv', 'source'):
+    for subfolder in ('database', 'static', 'testGoat', 'superlists'):
         run(f'mkdir -p {site_folder}/{subfolder}')
 
 def _get_latest_source(source_folder):
@@ -46,7 +46,7 @@ def _update_settings(source_folder, site_name):
     append(settings_path, '\nfrom .secret_key import SECRET_KEY')
 
 def _update_virtualenv(source_folder):
-    virtualenv_folder = source_folder + '/../virtualenv'
+    virtualenv_folder = source_folder + '/../testGoat'
     if not exists(virtualenv_folder + '/bin/pip'):
         run(f'python3.6 -m venv {virtualenv_folder}')
     run(f'{virtualenv_folder}/bin/pip install -r {source_folder}/requirements.txt')
@@ -54,19 +54,19 @@ def _update_virtualenv(source_folder):
 def _update_static_files(source_folder):
     run(
         f'cd {source_folder}'
-        ' && ../virtualenv/bin/python manage.py collectstatic --noinput'
+        ' && ../testGoat/bin/python manage.py collectstatic --noinput'
     )
 
 def _update_database(source_folder):
     run(
         f'cd {source_folder}'
-        ' && ../virtualenv/bin/python manage.py migrate --noinput'
+        ' && ../testGoat/bin/python manage.py migrate --noinput'
     )
 
 
 def deploy():
     site_folder = f'/home/{env.user}/{env.host}'
-    source_folder = site_folder + '/source'
+    source_folder = site_folder + '/superlists'
     _create_directory_structure_if_necassary(site_folder)
     _get_latest_source(source_folder)
     _update_settings(source_folder, env.host)

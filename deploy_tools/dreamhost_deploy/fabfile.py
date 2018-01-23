@@ -20,7 +20,7 @@ REPO_URL = "https://github.com/dwainetrain/TDD_Goat.git"
 # I'll need to setup fabric with the dreamhost instructions it appears...
 
 def _create_directory_structure_if_necassary(site_folder):
-    for subfolder in ('database', 'static', 'testGoat', 'superlists'):
+    for subfolder in ('database', 'public/static', 'testGoat', 'superlists'):
         run(f'mkdir -p {site_folder}/{subfolder}')
 
 def _get_latest_source(source_folder):
@@ -63,6 +63,10 @@ def _update_database(source_folder):
         ' && ../testGoat/bin/python manage.py migrate --noinput'
     )
 
+def _copy_passenger_wsgi_to_site_root(source_folder):
+    run(
+        f'cd "deploy_tools"'
+    )
 
 def deploy():
     site_folder = f'/home/{env.user}/{env.host}'

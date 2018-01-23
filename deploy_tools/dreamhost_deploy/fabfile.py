@@ -65,7 +65,7 @@ def _update_database(source_folder):
 
 def _copy_passenger_wsgi_to_site_root(source_folder):
     run(
-        f'cd "deploy_tools"'
+        f'cp {source_folder}/deploy_tools/passenger_wsgi.py ../'
     )
 
 def deploy():
@@ -76,4 +76,5 @@ def deploy():
     _update_settings(source_folder, env.host)
     _update_virtualenv(source_folder)
     _update_static_files(source_folder)
+    _copy_passenger_wsgi_to_site_root(source_folder)
     _update_database(source_folder)

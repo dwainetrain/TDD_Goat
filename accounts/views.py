@@ -10,11 +10,11 @@ from accounts.models import Token
 # Create your views here.
 
 def send_login_email(request):
-    # email = request.POST['email'] ## TDD Goat, but gives MultiValueDictKeyError
+    email = request.POST['email'] ## TDD Goat, but gives MultiValueDictKeyError
     ## Below fixes error, but is still complicates things, the second option is
     # A hard coded email to send to! Not the one entered in the form...
     # So making that work is going to be difficult...
-    email = request.POST.get('email', 'dwainetrain@gmail.com') ## Dwaine
+    #email = request.POST.get('email', 'dwainetrain@gmail.com') ## Dwaine
     uid = str(uuid.uuid4())
     Token.objects.create(email=email, uid=uid)
     print('saving uid', uid, 'for email', email, file=sys.stderr)

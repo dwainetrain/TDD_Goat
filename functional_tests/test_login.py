@@ -7,6 +7,8 @@ from .base import FunctionalTest
 TEST_EMAIL = 'edith@example.com'
 SUBJECT = 'Your login link for Superlists'
 
+# Hmmm...let's put this comment here so we can move to master...
+
 class LoginTest(FunctionalTest):
 
     def test_can_get_email_link_to_log_in(self):

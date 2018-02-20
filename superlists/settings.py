@@ -12,6 +12,25 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 
 import os
 
+import json # 2 Scoops 5.4.1, Env Varible Alternative
+# Normally you should not import anything from Django Directly
+# into your settings, but ImproperlyConfigured is an exception
+from django.core.exceptions import ImproperlyConfigured
+
+# JSON-based secrets module (see 2 Scoops, 5.4.1)
+with open('../etc/secrets.json') as f:
+    secrets = json.loads(f.read())
+
+def get_secret(setting, secrets=secrets):
+    '''Get the secret variable or return explicit exception.'''
+    try:
+        return secrets[setting]
+    except KeyError:
+        error_msg = 'Set the {0} environment variable'.format(setting)
+        raise ImproperlyConfigured(error_msg)
+
+
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -20,7 +39,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'asw4ay-l88%s+^qz*_f^bwbcsb%d8nnn*7b1w*+yc&y&v$b%ja'
+SECRET_KEY = get_secret('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -144,8 +163,8 @@ AUTHENTICATION_BACKENDS = [
     'accounts.authentication.PasswordlessAuthenticationBackend'
 ]
 
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'dwaine.best@gmail.com'
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_PASSWORD')
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
+EMAIL_HOST = get_secret('EMAIL_HOST')
+EMAIL_HOST_USER = get_secret('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = get_secret('EMAIL_HOST_PASSWORD')
+EMAIL_PORT = get_secret('EMAIL_PORT')
+EMAIL_USE_TLS = get_secret('EMAIL_USE_TLS')

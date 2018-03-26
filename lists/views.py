@@ -2,7 +2,7 @@ from django.shortcuts import redirect, render
 
 from django.core.exceptions import ValidationError
 
-from lists.forms import ExistingListItemForm, ItemForm, EMPTY_ITEM_ERROR
+from lists.forms import ExistingListItemForm, ItemForm, NewListForm #EMPTY_ITEM_ERROR
 from lists.models import Item, List
 
 from django.contrib.auth import get_user_model
@@ -34,6 +34,10 @@ def new_list(request):
         return redirect(list_)
     else:
         return render(request, 'home.html', {"form": form})
+
+def new_list2(request):
+    form = NewListForm(data=request.POST)
+    form.save(owner=request.user) 
 
 def view_list(request, list_id):
     list_ = List.objects.get (id = list_id)

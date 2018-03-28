@@ -110,21 +110,29 @@ class NewListViewIntergratedTest(TestCase):
         response = self.client.post('/lists/new', data={'text':''})
         self.assertContains(response, escape(EMPTY_ITEM_ERROR))
 
-    @unittest.skip
-    def test_list_owner_is_saved_if_user_is_authenticated(
-        self, mockItemFormClass, mockListClass
-    ):
+    #@unittest.skip
+    # def test_list_owner_is_saved_if_user_is_authenticated(
+    #     self, mockItemFormClass, mockListClass
+    # ):
+    #     user = User.objects.create(email='a@b.com')
+    #     self.client.force_login(user)
+    #     mock_list = mockListClass.return_value
+    #
+    #     def check_owner_assigned():
+    #         self.assertEqual(mock_list.owner, user)
+    #     mock_list.save.side_effect = check_owner_assigned
+    #
+    #     self.client.post('/lists/new', data={'text': 'new item'})
+    #
+    #     mock_list.save.assert_called_once_with()
+
+    def test_list_owner_is_saved_if_user_is_authenticated(self):
         user = User.objects.create(email='a@b.com')
         self.client.force_login(user)
-        mock_list = mockListClass.return_value
-
-        def check_owner_assigned():
-            self.assertEqual(mock_list.owner, user)
-        mock_list.save.side_effect = check_owner_assigned
-
         self.client.post('/lists/new', data={'text': 'new item'})
+        list_ = List.objects.first()
+        self.assertEqual(list_.owner, user)
 
-        mock_list.save.assert_called_once_with()
 
 class ListViewTest(TestCase):
 

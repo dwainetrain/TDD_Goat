@@ -88,14 +88,13 @@ class NewListViewIntergratedTest(TestCase):
         response = self.client.post('/lists/new', data={'text': ''})
         self.assertEqual(List.objects.count(), 0)
         self.assertContains(response, escape(EMPTY_ITEM_ERROR))
-    
+
     def test_list_owner_is_saved_if_user_is_authenticated(self):
         user = User.objects.create(email='a@b.com')
         self.client.force_login(user)
         self.client.post('/lists/new', data={'text': 'new item'})
         list_ = List.objects.first()
         self.assertEqual(list_.owner, user)
-
 
 class ListViewTest(TestCase):
 

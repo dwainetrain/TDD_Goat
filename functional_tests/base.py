@@ -37,6 +37,7 @@ class FunctionalTest(StaticLiveServerTestCase):
     def take_screenshot(self):
         filename = self._get_filename() + '.png'
         print('screenshotting to', filename)
+        self.browser.get_screenshot_as_file(filename)
 
     def dump_html(self):
         filename = self._get_filename()+'.html'

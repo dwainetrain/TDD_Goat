@@ -23,7 +23,6 @@ class MyListsTest(FunctionalTest):
         ))
 
     def test_logged_in_users_lists_are_saved_as_my_lists(self):
-        self.fail()
         # email = 'dwaine.best@gmail.com'
         # self.browser.get(self.live_server_url)
         # self.wait_to_be_logged_out(email)
@@ -69,6 +68,8 @@ class MyListsTest(FunctionalTest):
         self.wait_for(
             lambda: self.assertEqual(self.browser.current_url, second_list_url)
         )
+
+        self.fail()
 
         # She logs out. The 'My lists' option disappears
         self.browser.find_element_by_link_text('Log out').click()

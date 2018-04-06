@@ -21,7 +21,7 @@ class ListPage(object):
 
     def add_list_item(self, item_text):
         new_item_no = len(self.get_table_rows()) + 1
-        self.get_item_input_box().send_keys(item_test)
+        self.get_item_input_box().send_keys(item_text)
         self.get_item_input_box().send_keys(Keys.ENTER)
         self.wait_for_row_in_list_table(item_text, new_item_no)
         return self

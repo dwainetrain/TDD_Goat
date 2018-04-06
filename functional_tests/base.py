@@ -1,16 +1,17 @@
 import time
 import os
+import sys
 from datetime import datetime
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium import webdriver
 from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.common.keys import Keys
-from .server_tools import reset_database
 
 from django.conf import settings
-from django.contrib.auth import BACKEND_SESSION_KEY, SESSION_KEY, get_user_model
-from django.contrib.sessions.backends.db import SessionStore
-User = get_user_model()
+#chap25 from django.contrib.auth import BACKEND_SESSION_KEY, SESSION_KEY, get_user_model
+#chap25 from django.contrib.sessions.backends.db import SessionStore
+#chap25 User = get_user_model()
+from .server_tools import reset_database
 from .server_tools import create_session_on_server
 from .management.commands.create_session import create_pre_authenticated_session
 
@@ -41,28 +42,6 @@ class FunctionalTest(StaticLiveServerTestCase):
             self.live_server_url = 'http://' + self.staging_server
             reset_database(self.staging_server)
     
-    def take_screenshot(self):
-        filename = self._get_filename() + '.png'
-        print('screenshotting to', filename)
-        self.browser.get_screenshot_as_file(filename)
-
-    def dump_html(self):
-        filename = self._get_filename()+'.html'
-        print('dumping page HTML to', filename)
-        with open(filename, 'w') as f:
-            f.write(self.browser.page_source)
-
-    def _get_filename(self):
-        timestamp = datetime.now().isoformat().replace(':', '.')[:19]
-        return '{folder}/{classname}.{method}-window{windowid}-{timestamp}'.format(
-            folder=SCREEN_DUMP_LOCATION,
-            classname=self.__class__.__name__,
-            method=self._testMethodName,
-            windowid=self._windowid,
-            timestamp=timestamp
-
-        )
-    
     def tearDown(self):
         if self._test_has_failed():
             if not os.path.exists(SCREEN_DUMP_LOCATION):
@@ -79,8 +58,33 @@ class FunctionalTest(StaticLiveServerTestCase):
         # slightly obscure but couldn't find a better way!
         return any(error for (method, error) in self._outcome.errors)
 
+    def take_screenshot(self):
+        filename = self._get_filename() + '.png'
+        print('screenshotting to', filename)
+        self.browser.get_screenshot_as_file(filename)
+
     # helper method, refactoring to remove repeated code accessing
     # the rows
+    def dump_html(self):
+        filename = self._get_filename()+'.html'
+        print('dumping page HTML to', filename)
+        with open(filename, 'w') as f:
+            f.write(self.browser.page_source)
+
+    def _get_filename(self):
+        timestamp = datetime.now().isoformat().replace(':', '.')[:19]
+        return '{folder}/{classname}.{method}-window{windowid}-{timestamp}'.format(
+            folder=SCREEN_DUMP_LOCATION,
+            classname=self.__class__.__name__,
+            method=self._testMethodName,
+            windowid=self._windowid,
+            timestamp=timestamp
+
+        )
+
+    @wait
+    def wait_for(self, fn):
+        return fn()
 
     @wait
     def wait_for_row_in_list_table(self, row_text):
@@ -88,12 +92,15 @@ class FunctionalTest(StaticLiveServerTestCase):
         rows = table.find_elements_by_tag_name('tr')
         self.assertIn(row_text, [row.text for row in rows])
 
-    @wait
-    def wait_for(self, fn):
-        return fn()
-
     def get_item_input_box(self):
         return self.browser.find_element_by_id('id_text')
+
+    def add_list_item(self, item_text):
+        num_roms = len(self.browser.find_elements_by_css_selector('#id_list_table tr'))
+        self.get_item_input_box().send_keys(item_text)
+        self.get_item_input_box().send_keys(Keys.ENTER)
+        item_number = num_roms + 1
+        self.wait_for_row_in_list_table(f'{item_number}: {item_text}')
 
     @wait
     def wait_to_be_logged_in(self, email):
@@ -107,13 +114,6 @@ class FunctionalTest(StaticLiveServerTestCase):
         navbar = self.browser.find_element_by_css_selector('.navbar')
         self.assertNotIn(email, navbar.text)
 
-    def add_list_item(self, item_text):
-        num_roms = len(self.browser.find_elements_by_css_selector('#id_list_table tr'))
-        self.get_item_input_box().send_keys(item_text)
-        self.get_item_input_box().send_keys(Keys.ENTER)
-        item_number = num_roms + 1
-        self.wait_for_row_in_list_table(f'{item_number}: {item_text}')
-
     def create_pre_authenticated_session(self, email):
         if self.staging_server:
             session_key = create_session_on_server(self.staging_server, email)
@@ -121,7 +121,12 @@ class FunctionalTest(StaticLiveServerTestCase):
             session_key = create_pre_authenticated_session(email)
         ## to set a cookie we need to first visit the domain.
         ## 404 pages load the quickest!
-        self.browser.get(self.live_server_url + "/404_no_such_url/")
+        ## self.browser.get(self.live_server_url + "/404_no_such_url/")
+        ## this technique of going to a 404 page is suddenly causing errors
+        ## It seems to just sit on the 404 page and then the next test
+        ## can't find the 'id_text' element
+        ## so, I'm just sending the authentication to the homepage
+        self.browser.get(self.live_server_url)
         self.browser.add_cookie(dict(
             name=settings.SESSION_COOKIE_NAME,
             value=session_key,
